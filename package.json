@@ -1,0 +1,30 @@
+{
+  "name": "pr-stats",
+  "version": "0.0.1",
+  "description": "Pulls request statistics after merge.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manzan46/pr-stats.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/manzan46/pr-stats/issues"
+  },
+  "homepage": "https://github.com/manzan46/pr-stats#readme",
+  "dependencies": {
+    "@actions/core": "^1.6.0",
+    "@actions/github": "^5.0.0",
+    "humanize-duration": "^3.27.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "eslint": "^8.2.0",
+    "prettier": "^2.4.1"
+  }
+}

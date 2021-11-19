@@ -1,0 +1,14 @@
+name: Pull Request Stats
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run pull request stats
+        uses: manzan46/pr-stats@main
+        with:
+          comment: true

@@ -1,0 +1,17 @@
+name: "PR stats"
+description: "Pulls request statistics after merge."
+inputs:
+  token:
+    description: "GitHub authentication token"
+    required: true
+    default: ${{ github.token }}
+  comment:
+    description: "Add stats as PR comments"
+    required: true
+    default: false
+outputs:
+  pr_stats:
+    description: "Stats for the merged pull request"
+runs:
+  using: "node12"
+  main: "dist/index.js"
