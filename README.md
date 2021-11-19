@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run pull request stats
-        uses: manzan46/pr-stats@main
+        uses: manzan46/pr-stats@v0.1.0
         with:
           comment: true
 ```
