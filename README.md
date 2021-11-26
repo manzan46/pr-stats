@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run pull request stats
-        uses: manzan46/pr-stats@v0.1.0
+        uses: wooclap/pr-stats@v0.1.0
         with:
           comment: true
 ```
@@ -94,3 +94,8 @@ Few Note:
 📸 Example of comment posted by the actions in the merged PR:
 
 ![image](https://user-images.githubusercontent.com/1071962/142687994-ca7896bc-fe0b-44a1-ae05-3c268b21a2ad.png)
+
+
+## Build
+
+`ncc build src/index.js --license LICENSE`

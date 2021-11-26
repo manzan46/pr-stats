@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/manzan46/pr-stats.git"
+    "url": "git+https://github.com/wooclap/pr-stats.git"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/manzan46/pr-stats/issues"
+    "url": "https://github.com/wooclap/pr-stats/issues"
   },
-  "homepage": "https://github.com/manzan46/pr-stats#readme",
+  "homepage": "https://github.com/wooclap/pr-stats#readme",
   "dependencies": {
     "@actions/core": "^1.6.0",
     "@actions/github": "^5.0.0",
