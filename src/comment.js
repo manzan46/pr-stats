@@ -25,7 +25,7 @@ module.exports = {
     )})|
 
 ❓ All main stats are time difference from PR creation date and between round bracket the time difference for previous step.
-For more information link for [the repo](https://github.com/woocalp/pr-stats).`;
+For more information link for [the repo](https://github.com/wooclap/pr-stats).`;
 
     return comment;
   },
