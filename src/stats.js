@@ -4,7 +4,7 @@ const {
   getPullRequestEventsTimeline,
   getPreviousPullRequests,
 } = require("./api");
-const { timeDiff, averageTimeDiff } = require("./helper");
+const { averageValues, timeDiff } = require("./helper");
 
 const READY_FOR_REVIEW_EVENT = "ready_for_review";
 const REVIEWED_EVENT = "reviewed";
@@ -27,50 +27,12 @@ const self = (module.exports = {
         })
     );
 
-    const result = statsResult.reduce((a, b) => {
-      return {
-        readyForReview: {
-          fromPrCreation: averageTimeDiff(
-            a.readyForReview.fromPrCreation,
-            b.readyForReview.fromPrCreation
-          ),
-          fromPreviousStep: averageTimeDiff(
-            a.readyForReview.fromPreviousStep,
-            b.readyForReview.fromPreviousStep
-          ),
-        },
-        firstReview: {
-          fromPrCreation: averageTimeDiff(
-            a.firstReview.fromPrCreation,
-            b.firstReview.fromPrCreation
-          ),
-          fromPreviousStep: averageTimeDiff(
-            a.firstReview.fromPreviousStep,
-            b.firstReview.fromPreviousStep
-          ),
-        },
-        firstApprovedReview: {
-          fromPrCreation: averageTimeDiff(
-            a.firstApprovedReview.fromPrCreation,
-            b.firstApprovedReview.fromPrCreation
-          ),
-          fromPreviousStep: averageTimeDiff(
-            a.firstApprovedReview.fromPreviousStep,
-            b.firstApprovedReview.fromPreviousStep
-          ),
-        },
-        merged: {
-          fromPrCreation: averageTimeDiff(
-            a.merged.fromPrCreation,
-            b.merged.fromPrCreation
-          ),
-          fromPreviousStep: averageTimeDiff(
-            a.merged.fromPreviousStep,
-            b.merged.fromPreviousStep
-          ),
-        },
-      };
-    });
+    const result = {}
+
+    ["readyForReview", "firstReview", "firstApprovedReview", "merged"].forEach(column => result[column] = {
+      fromPrCreation: averageValues(statsResult.map(sr => sr[column].fromPrCreation)),
+      fromPreviousStep: averageValues(statsResult.map(sr => sr[column].fromPreviousStep))
+    })
 
     return result;
   },

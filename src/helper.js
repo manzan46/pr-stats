@@ -26,6 +26,14 @@ module.exports = {
     return (a + b) / 2;
   },
 
+  averageValues(listOfValues) {
+    const _sum = 0;
+    for (const val of listOfValues) {
+      _sum += val
+    }
+    return _sum / listOfValues.length;
+  },
+
   timeDiff: (start, end) => {
     if (!start || !end) {
       return null;
