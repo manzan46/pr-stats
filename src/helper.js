@@ -1,5 +1,5 @@
-const core = require("@actions/core");
-const humanizeDuration = require("humanize-duration");
+const core = require('@actions/core');
+const humanizeDuration = require('humanize-duration');
 
 module.exports = {
   objectLogger: (prefix, object) => {
@@ -42,7 +42,7 @@ module.exports = {
     return Math.abs(new Date(start) - new Date(end));
   },
 
-  humanize: (duration) => {
+  humanize: duration => {
     return humanizeDuration(duration, { largest: 2, round: true });
   },
 };
