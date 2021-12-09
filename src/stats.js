@@ -1,17 +1,17 @@
-var _ = require("lodash");
+var _ = require('lodash');
 
 const {
   getPullRequestEventsTimeline,
   getPreviousPullRequests,
-} = require("./api");
-const { timeDiff, averageTimeDiff } = require("./helper");
+} = require('./api');
+const { averageValues, timeDiff } = require('./helper');
 
-const READY_FOR_REVIEW_EVENT = "ready_for_review";
-const REVIEWED_EVENT = "reviewed";
-const APPROVED_STATUS = "approved";
+const READY_FOR_REVIEW_EVENT = 'ready_for_review';
+const REVIEWED_EVENT = 'reviewed';
+const APPROVED_STATUS = 'approved';
 
 const findFirstInTimeline = ({ timeline, fn }) => {
-  return _.find(timeline, (el) => fn(el));
+  return _.find(timeline, el => fn(el));
 };
 
 const self = (module.exports = {
@@ -20,62 +20,31 @@ const self = (module.exports = {
 
     const statsResult = await Promise.all(
       previousPRs
-        .filter((pr) => pr.merged_at !== null)
-        .map(async (pr) => {
+        .filter(pr => pr.merged_at !== null)
+        .map(async pr => {
           const stats = await self.getPullRequestStats(pr);
           return stats;
         })
     );
 
-    const result = statsResult.reduce((a, b) => {
-      return {
-        readyForReview: {
-          fromPrCreation: averageTimeDiff(
-            a.readyForReview.fromPrCreation,
-            b.readyForReview.fromPrCreation
+    const result = {}[
+      ('readyForReview', 'firstReview', 'firstApprovedReview', 'merged')
+    ].forEach(
+      column =>
+        (result[column] = {
+          fromPrCreation: averageValues(
+            statsResult.map(sr => sr[column].fromPrCreation)
           ),
-          fromPreviousStep: averageTimeDiff(
-            a.readyForReview.fromPreviousStep,
-            b.readyForReview.fromPreviousStep
+          fromPreviousStep: averageValues(
+            statsResult.map(sr => sr[column].fromPreviousStep)
           ),
-        },
-        firstReview: {
-          fromPrCreation: averageTimeDiff(
-            a.firstReview.fromPrCreation,
-            b.firstReview.fromPrCreation
-          ),
-          fromPreviousStep: averageTimeDiff(
-            a.firstReview.fromPreviousStep,
-            b.firstReview.fromPreviousStep
-          ),
-        },
-        firstApprovedReview: {
-          fromPrCreation: averageTimeDiff(
-            a.firstApprovedReview.fromPrCreation,
-            b.firstApprovedReview.fromPrCreation
-          ),
-          fromPreviousStep: averageTimeDiff(
-            a.firstApprovedReview.fromPreviousStep,
-            b.firstApprovedReview.fromPreviousStep
-          ),
-        },
-        merged: {
-          fromPrCreation: averageTimeDiff(
-            a.merged.fromPrCreation,
-            b.merged.fromPrCreation
-          ),
-          fromPreviousStep: averageTimeDiff(
-            a.merged.fromPreviousStep,
-            b.merged.fromPreviousStep
-          ),
-        },
-      };
-    });
+        })
+    );
 
     return result;
   },
 
-  getPullRequestStats: async (pr) => {
+  getPullRequestStats: async pr => {
     const prNumber = pr.number;
     const prCreationDate = pr.created_at;
     const prMergedDate = pr.merged_at;
@@ -84,7 +53,7 @@ const self = (module.exports = {
 
     const firstReadyForReviewEvent = findFirstInTimeline({
       timeline,
-      fn: (el) => el.event == READY_FOR_REVIEW_EVENT,
+      fn: el => el.event == READY_FOR_REVIEW_EVENT,
     });
     const readyForReviewDate = firstReadyForReviewEvent
       ? firstReadyForReviewEvent.created_at
@@ -92,7 +61,7 @@ const self = (module.exports = {
 
     const firstReviewEvent = findFirstInTimeline({
       timeline,
-      fn: (el) => el.event == REVIEWED_EVENT && el.user.id !== pr.user.id,
+      fn: el => el.event == REVIEWED_EVENT && el.user.id !== pr.user.id,
     });
     const firstReviewDate = firstReviewEvent
       ? firstReviewEvent.submitted_at
@@ -100,7 +69,7 @@ const self = (module.exports = {
 
     const firstApprovedReviewEvent = findFirstInTimeline({
       timeline,
-      fn: (el) => el.event == REVIEWED_EVENT && el.state === APPROVED_STATUS,
+      fn: el => el.event == REVIEWED_EVENT && el.state === APPROVED_STATUS,
     });
     const firstApprovedReviewDate = firstApprovedReviewEvent
       ? firstApprovedReviewEvent.submitted_at

@@ -1,4 +1,4 @@
-const { humanize } = require("./helper");
+const { humanize } = require('./helper');
 
 module.exports = {
   buildComment: ({ prStats, averagePrStats }) => {

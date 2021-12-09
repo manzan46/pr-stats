@@ -1,8 +1,8 @@
-const core = require("@actions/core");
-const github = require("@actions/github");
+const core = require('@actions/core');
+const github = require('@actions/github');
 
-const VALID_EVENT_NAME = "pull_request";
-const CLOSED_TYPE_NAME = "closed";
+const VALID_EVENT_NAME = 'pull_request';
+const CLOSED_TYPE_NAME = 'closed';
 
 module.exports = {
   validateActionCtx: () => {
@@ -20,9 +20,9 @@ module.exports = {
     );
   },
 
-  isPrMerged: (pr) => {
+  isPrMerged: pr => {
     if (pr.merged == false) {
-      core.info("PR closed but not merged, skipping ...");
+      core.info('PR closed but not merged, skipping ...');
 
       return false;
     }

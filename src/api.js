@@ -1,20 +1,20 @@
-const core = require("@actions/core");
-const github = require("@actions/github");
+const core = require('@actions/core');
+const github = require('@actions/github');
 
-const octokit = new github.getOctokit(core.getInput("token"));
+const octokit = new github.getOctokit(core.getInput('token'));
 
 module.exports = {
   getPreviousPullRequests: async () => {
     const { data } = await octokit.rest.pulls.list({
       ...github.context.repo,
-      state: "closed",
+      state: 'closed',
       per_page: 50,
     });
 
     return data;
   },
 
-  getPullRequestEventsTimeline: async (pr_number) => {
+  getPullRequestEventsTimeline: async pr_number => {
     const { data } = await octokit.rest.issues.listEventsForTimeline({
       ...github.context.repo,
       issue_number: pr_number,
