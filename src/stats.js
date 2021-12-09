@@ -27,12 +27,19 @@ const self = (module.exports = {
         })
     );
 
-    const result = {}
-
-    ["readyForReview", "firstReview", "firstApprovedReview", "merged"].forEach(column => result[column] = {
-      fromPrCreation: averageValues(statsResult.map(sr => sr[column].fromPrCreation)),
-      fromPreviousStep: averageValues(statsResult.map(sr => sr[column].fromPreviousStep))
-    })
+    const result = {}[
+      ("readyForReview", "firstReview", "firstApprovedReview", "merged")
+    ].forEach(
+      (column) =>
+        (result[column] = {
+          fromPrCreation: averageValues(
+            statsResult.map((sr) => sr[column].fromPrCreation)
+          ),
+          fromPreviousStep: averageValues(
+            statsResult.map((sr) => sr[column].fromPreviousStep)
+          ),
+        })
+    );
 
     return result;
   },

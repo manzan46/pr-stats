@@ -27,9 +27,9 @@ module.exports = {
   },
 
   averageValues(listOfValues) {
-    const _sum = 0;
+    let _sum = 0;
     for (const val of listOfValues) {
-      _sum += val
+      _sum += val;
     }
     return _sum / listOfValues.length;
   },
