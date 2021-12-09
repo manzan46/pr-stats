@@ -1,14 +1,15 @@
 # 🌟 pr-stats 🌟
 
 📈 `pr-stats` GitHub Actions allows to gather stats around merged Pull Requests and
-understand where is time spend between Pull request creation and merged. It will calculate stats for the merged PR but also give an average on the previously merged Pull Requests in the same repo.
+understand where is time spend between Pull request creation and merged.
+
+It will calculate stats for the merged PR but also give an average on the previously merged Pull Requests in the same repo.
 
 🗯️ It can be used out of the box and write a comment in the Pull Request once merged. Or output can be used in a separate GitHub Actions (e.g Slack message) in order to show these stats.
 
 ⚠️ Not ready to use yet, still plenty to do:
 
 - [] Add test
-- [] Fetch all events timeline (currently only 100)
 
 💡 Inspired by https://github.com/marketplace/actions/pull-request-stats
 
@@ -94,7 +95,6 @@ Few Note:
 📸 Example of comment posted by the actions in the merged PR:
 
 ![image](https://user-images.githubusercontent.com/1071962/142687994-ca7896bc-fe0b-44a1-ae05-3c268b21a2ad.png)
-
 
 ## Build
 

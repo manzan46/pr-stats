@@ -14,42 +14,10 @@ const findFirstInTimeline = ({ timeline, fn }) => {
   return _.find(timeline, el => fn(el));
 };
 
-const self = (module.exports = {
-  getAveragePullRequestStats: async () => {
-    let previousPRs = await getPreviousPullRequests();
-
-    const statsResult = await Promise.all(
-      previousPRs
-        .filter(pr => pr.merged_at !== null)
-        .map(async pr => {
-          const stats = await self.getPullRequestStats(pr);
-          return stats;
-        })
-    );
-
-    const result = {}[
-      ('readyForReview', 'firstReview', 'firstApprovedReview', 'merged')
-    ].forEach(
-      column =>
-        (result[column] = {
-          fromPrCreation: averageValues(
-            statsResult.map(sr => sr[column].fromPrCreation)
-          ),
-          fromPreviousStep: averageValues(
-            statsResult.map(sr => sr[column].fromPreviousStep)
-          ),
-        })
-    );
-
-    return result;
-  },
-
-  getPullRequestStats: async pr => {
-    const prNumber = pr.number;
+module.exports = {
+  getStatsFromEventsTimeline: (pr, timeline) => {
     const prCreationDate = pr.created_at;
     const prMergedDate = pr.merged_at;
-
-    const timeline = await getPullRequestEventsTimeline(prNumber);
 
     const firstReadyForReviewEvent = findFirstInTimeline({
       timeline,
@@ -94,4 +62,40 @@ const self = (module.exports = {
       },
     };
   },
-});
+
+  getAveragePullRequestStats: async () => {
+    let previousPRs = await getPreviousPullRequests();
+
+    const statsResult = await Promise.all(
+      previousPRs
+        .filter(pr => pr.merged_at !== null)
+        .map(async pr => {
+          const stats = await self.getPullRequestStats(pr);
+          return stats;
+        })
+    );
+
+    const result = {};
+    ['readyForReview', 'firstReview', 'firstApprovedReview', 'merged'].forEach(
+      column =>
+        (result[column] = {
+          fromPrCreation: averageValues(
+            statsResult.map(sr => sr[column].fromPrCreation)
+          ),
+          fromPreviousStep: averageValues(
+            statsResult.map(sr => sr[column].fromPreviousStep)
+          ),
+        })
+    );
+
+    return result;
+  },
+
+  getPullRequestStats: async pr => {
+    const prNumber = pr.number;
+
+    const timeline = await getPullRequestEventsTimeline(prNumber);
+
+    return self.getStatsFromEventsTimeline(pr, timeline);
+  },
+};

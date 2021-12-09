@@ -27208,25 +27208,31 @@ function wrappy (fn, cb) {
 const core = __nccwpck_require__(2669);
 const github = __nccwpck_require__(6330);
 
-const octokit = new github.getOctokit(core.getInput("token"));
+let octokit;
+if (process.env.NODE_ENV != 'test') {
+  octokit = new github.getOctokit(core.getInput('token'));
+}
 
 module.exports = {
   getPreviousPullRequests: async () => {
     const { data } = await octokit.rest.pulls.list({
       ...github.context.repo,
-      state: "closed",
+      state: 'closed',
       per_page: 50,
     });
 
     return data;
   },
 
-  getPullRequestEventsTimeline: async (pr_number) => {
-    const { data } = await octokit.rest.issues.listEventsForTimeline({
-      ...github.context.repo,
-      issue_number: pr_number,
-      per_page: 100, // TODO: fetch all.
-    });
+  getPullRequestEventsTimeline: async pr_number => {
+    const data = await octokit.paginate(
+      octokit.rest.issues.listEventsForTimeline,
+      {
+        ...github.context.repo,
+        issue_number: pr_number,
+        per_page: 100,
+      }
+    );
 
     return data;
   },
@@ -27272,8 +27278,10 @@ module.exports = {
       averagePrStats.merged.fromPreviousStep
     )})|
 
+ℹ️ Calculated with [version v0.1.0](https://github.com/wooclap/pr-stats/releases/tag/v0.1.0)
+
 ❓ All main stats are time difference from PR creation date and between round bracket the time difference for previous step.
-For more information link for [the repo](https://github.com/manzan46/pr-stats).`;
+For more information link for [the repo](https://github.com/wooclap/pr-stats).`;
 
     return comment;
   },
@@ -27313,6 +27321,14 @@ module.exports = {
     return (a + b) / 2;
   },
 
+  averageValues(listOfValues) {
+    let _sum = 0;
+    for (const val of listOfValues) {
+      _sum += val;
+    }
+    return _sum / listOfValues.length;
+  },
+
   timeDiff: (start, end) => {
     if (!start || !end) {
       return null;
@@ -27321,7 +27337,7 @@ module.exports = {
     return Math.abs(new Date(start) - new Date(end));
   },
 
-  humanize: (duration) => {
+  humanize: duration => {
     return humanizeDuration(duration, { largest: 2, round: true });
   },
 };
@@ -27338,87 +27354,24 @@ const {
   getPullRequestEventsTimeline,
   getPreviousPullRequests,
 } = __nccwpck_require__(8649);
-const { timeDiff, averageTimeDiff } = __nccwpck_require__(4325);
+const { averageValues, timeDiff } = __nccwpck_require__(4325);
 
-const READY_FOR_REVIEW_EVENT = "ready_for_review";
-const REVIEWED_EVENT = "reviewed";
-const APPROVED_STATUS = "approved";
+const READY_FOR_REVIEW_EVENT = 'ready_for_review';
+const REVIEWED_EVENT = 'reviewed';
+const APPROVED_STATUS = 'approved';
 
 const findFirstInTimeline = ({ timeline, fn }) => {
-  return _.find(timeline, (el) => fn(el));
+  return _.find(timeline, el => fn(el));
 };
 
-const self = (module.exports = {
-  getAveragePullRequestStats: async () => {
-    let previousPRs = await getPreviousPullRequests();
-
-    const statsResult = await Promise.all(
-      previousPRs
-        .filter((pr) => pr.merged_at !== null)
-        .map(async (pr) => {
-          const stats = await self.getPullRequestStats(pr);
-          return stats;
-        })
-    );
-
-    const result = statsResult.reduce((a, b) => {
-      return {
-        readyForReview: {
-          fromPrCreation: averageTimeDiff(
-            a.readyForReview.fromPrCreation,
-            b.readyForReview.fromPrCreation
-          ),
-          fromPreviousStep: averageTimeDiff(
-            a.readyForReview.fromPreviousStep,
-            b.readyForReview.fromPreviousStep
-          ),
-        },
-        firstReview: {
-          fromPrCreation: averageTimeDiff(
-            a.firstReview.fromPrCreation,
-            b.firstReview.fromPrCreation
-          ),
-          fromPreviousStep: averageTimeDiff(
-            a.firstReview.fromPreviousStep,
-            b.firstReview.fromPreviousStep
-          ),
-        },
-        firstApprovedReview: {
-          fromPrCreation: averageTimeDiff(
-            a.firstApprovedReview.fromPrCreation,
-            b.firstApprovedReview.fromPrCreation
-          ),
-          fromPreviousStep: averageTimeDiff(
-            a.firstApprovedReview.fromPreviousStep,
-            b.firstApprovedReview.fromPreviousStep
-          ),
-        },
-        merged: {
-          fromPrCreation: averageTimeDiff(
-            a.merged.fromPrCreation,
-            b.merged.fromPrCreation
-          ),
-          fromPreviousStep: averageTimeDiff(
-            a.merged.fromPreviousStep,
-            b.merged.fromPreviousStep
-          ),
-        },
-      };
-    });
-
-    return result;
-  },
-
-  getPullRequestStats: async (pr) => {
-    const prNumber = pr.number;
+module.exports = {
+  getStatsFromEventsTimeline: (pr, timeline) => {
     const prCreationDate = pr.created_at;
     const prMergedDate = pr.merged_at;
 
-    const timeline = await getPullRequestEventsTimeline(prNumber);
-
     const firstReadyForReviewEvent = findFirstInTimeline({
       timeline,
-      fn: (el) => el.event == READY_FOR_REVIEW_EVENT,
+      fn: el => el.event == READY_FOR_REVIEW_EVENT,
     });
     const readyForReviewDate = firstReadyForReviewEvent
       ? firstReadyForReviewEvent.created_at
@@ -27426,7 +27379,7 @@ const self = (module.exports = {
 
     const firstReviewEvent = findFirstInTimeline({
       timeline,
-      fn: (el) => el.event == REVIEWED_EVENT && el.user.id !== pr.user.id,
+      fn: el => el.event == REVIEWED_EVENT && el.user.id !== pr.user.id,
     });
     const firstReviewDate = firstReviewEvent
       ? firstReviewEvent.submitted_at
@@ -27434,7 +27387,7 @@ const self = (module.exports = {
 
     const firstApprovedReviewEvent = findFirstInTimeline({
       timeline,
-      fn: (el) => el.event == REVIEWED_EVENT && el.state === APPROVED_STATUS,
+      fn: el => el.event == REVIEWED_EVENT && el.state === APPROVED_STATUS,
     });
     const firstApprovedReviewDate = firstApprovedReviewEvent
       ? firstApprovedReviewEvent.submitted_at
@@ -27459,7 +27412,43 @@ const self = (module.exports = {
       },
     };
   },
-});
+
+  getAveragePullRequestStats: async () => {
+    let previousPRs = await getPreviousPullRequests();
+
+    const statsResult = await Promise.all(
+      previousPRs
+        .filter(pr => pr.merged_at !== null)
+        .map(async pr => {
+          const stats = await self.getPullRequestStats(pr);
+          return stats;
+        })
+    );
+
+    const result = {};
+    ['readyForReview', 'firstReview', 'firstApprovedReview', 'merged'].forEach(
+      column =>
+        (result[column] = {
+          fromPrCreation: averageValues(
+            statsResult.map(sr => sr[column].fromPrCreation)
+          ),
+          fromPreviousStep: averageValues(
+            statsResult.map(sr => sr[column].fromPreviousStep)
+          ),
+        })
+    );
+
+    return result;
+  },
+
+  getPullRequestStats: async pr => {
+    const prNumber = pr.number;
+
+    const timeline = await getPullRequestEventsTimeline(prNumber);
+
+    return self.getStatsFromEventsTimeline(pr, timeline);
+  },
+};
 
 
 /***/ }),
@@ -27470,8 +27459,8 @@ const self = (module.exports = {
 const core = __nccwpck_require__(2669);
 const github = __nccwpck_require__(6330);
 
-const VALID_EVENT_NAME = "pull_request";
-const CLOSED_TYPE_NAME = "closed";
+const VALID_EVENT_NAME = 'pull_request';
+const CLOSED_TYPE_NAME = 'closed';
 
 module.exports = {
   validateActionCtx: () => {
@@ -27489,9 +27478,9 @@ module.exports = {
     );
   },
 
-  isPrMerged: (pr) => {
+  isPrMerged: pr => {
     if (pr.merged == false) {
-      core.info("PR closed but not merged, skipping ...");
+      core.info('PR closed but not merged, skipping ...');
 
       return false;
     }
@@ -27705,18 +27694,21 @@ const run = async () => {
     const prStats = await getPullRequestStats(currentPR);
     const averagePrStats = await getAveragePullRequestStats();
 
-    if (core.getBooleanInput("comment")) {
+    if (core.getBooleanInput('comment')) {
       const comment = buildComment({ prStats, averagePrStats });
-      await writeComment({ pr_number: currentPR.number, comment });
+      await writeComment({
+        pr_number: currentPR.number,
+        comment,
+      });
     }
 
-    objectLogger("pr_stats", prStats);
-    objectLogger("avg_pr_stats", averagePrStats);
+    objectLogger('pr_stats', prStats);
+    objectLogger('avg_pr_stats', averagePrStats);
 
-    core.setOutput("pr_stats", prStats);
-    core.setOutput("avg_pr_stats", averagePrStats);
+    core.setOutput('pr_stats', prStats);
+    core.setOutput('avg_pr_stats', averagePrStats);
 
-    core.info("Action successfully executed");
+    core.info('Action successfully executed');
   } catch (error) {
     core.debug(`Execution failed with error: ${error.message}`);
     core.debug(error.stack);
