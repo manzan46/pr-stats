@@ -1,7 +1,10 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-const octokit = new github.getOctokit(core.getInput('token'));
+let octokit;
+if (process.env.NODE_ENV != 'test') {
+  octokit = new github.getOctokit(core.getInput('token'));
+}
 
 module.exports = {
   getPreviousPullRequests: async () => {
@@ -15,11 +18,14 @@ module.exports = {
   },
 
   getPullRequestEventsTimeline: async pr_number => {
-    const { data } = await octokit.rest.issues.listEventsForTimeline({
-      ...github.context.repo,
-      issue_number: pr_number,
-      per_page: 100, // TODO: fetch all.
-    });
+    const data = await octokit.paginate(
+      octokit.rest.issues.listEventsForTimeline,
+      {
+        ...github.context.repo,
+        issue_number: pr_number,
+        per_page: 100,
+      }
+    );
 
     return data;
   },

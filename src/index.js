@@ -21,7 +21,10 @@ const run = async () => {
 
     if (core.getBooleanInput('comment')) {
       const comment = buildComment({ prStats, averagePrStats });
-      await writeComment({ pr_number: currentPR.number, comment });
+      await writeComment({
+        pr_number: currentPR.number,
+        comment,
+      });
     }
 
     objectLogger('pr_stats', prStats);
