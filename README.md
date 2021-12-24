@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run pull request stats
-        uses: wooclap/pr-stats@v0.1.0
+        uses: wooclap/pr-stats@v0.2.0
         with:
           comment: true
 ```

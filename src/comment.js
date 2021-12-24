@@ -24,7 +24,7 @@ module.exports = {
       averagePrStats.merged.fromPreviousStep
     )})|
 
-ℹ️ Calculated with [version v0.1.0](https://github.com/wooclap/pr-stats/releases/tag/v0.1.0)
+ℹ️ Calculated with [version v0.2.0](https://github.com/wooclap/pr-stats/releases/tag/v0.2.0)
 
 ❓ All main stats are time difference from PR creation date and between round bracket the time difference for previous step.
 For more information link for [the repo](https://github.com/wooclap/pr-stats).`;
