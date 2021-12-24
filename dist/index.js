@@ -27420,7 +27420,7 @@ module.exports = {
       previousPRs
         .filter(pr => pr.merged_at !== null)
         .map(async pr => {
-          const stats = await self.getPullRequestStats(pr);
+          const stats = await module.exports.getPullRequestStats(pr);
           return stats;
         })
     );
@@ -27446,7 +27446,7 @@ module.exports = {
 
     const timeline = await getPullRequestEventsTimeline(prNumber);
 
-    return self.getStatsFromEventsTimeline(pr, timeline);
+    return module.exports.getStatsFromEventsTimeline(pr, timeline);
   },
 };
 
